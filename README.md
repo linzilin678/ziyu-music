@@ -1,0 +1,2 @@
+# ziyu-music
+yuni only
