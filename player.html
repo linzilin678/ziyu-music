@@ -1,64 +1,52 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-    <meta charset="UTF-8">
+    <title>正在打开音乐...</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>梓渝音乐 - 网页播放器</title>
     <style>
-        body { font-family: Arial; margin: 20px; background: linear-gradient(to bottom right, #dfe9f3, white); }
-        .player-card { max-width: 500px; margin: 40px auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
-        .song-title { color: #2d3436; font-size: 24px; margin: 15px 0; }
-        .direct-hint { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 10px; margin: 20px 0; }
-        .btn { padding: 12px 25px; margin: 10px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-play { background: #00b894; color: white; }
-        .btn-download { background: #0984e3; color: white; }
-        .btn-nfc { background: #6c5ce7; color: white; }
-        .btn:hover { transform: scale(1.05); }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .loading {
+            font-size: 24px;
+            margin: 20px;
+        }
+        .spinner {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 2s linear infinite;
+            margin: 30px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-    <div class="player-card">
-        <h1>🎧 网页播放器</h1>
-        <p class="song-title">正在播放：music.mp3</p>
-        
-        <audio id="audioElement" controls style="width:100%; margin:20px 0;"></audio>
-        
-        <div class="direct-hint">
-            <p><strong>💡 提示：</strong> 如需实现“直接跳转系统播放器”，请勿使用此网页链接。</p>
-            <p>应将NFC标签写入我们提供的<strong>直接文件链接</strong>。</p>
-        </div>
-        
-        <div>
-            <button class="btn btn-play" onclick="playMusic()">播放</button>
-            <button class="btn btn-download" onclick="downloadMusic()">下载文件</button>
-            <a href="index.html"><button class="btn btn-nfc">查看NFC链接</button></a>
-        </div>
-        
-        <div style="margin-top: 30px; font-size: 14px; color: #636e72;">
-            <p>此页面仅作为备用播放界面使用。</p>
-        </div>
-    </div>
-
+    <h1>🎵 梓渝音乐</h1>
+    <div class="loading">正在准备播放音乐...</div>
+    <div class="spinner"></div>
+    <p>请稍候，音乐即将开始</p>
+    
     <script>
-        const musicUrl = "https://cdn.jsdelivr.net/gh/linzilin678/ziyu-music/main/music.mp3";
-        const audio = document.getElementById('audioElement');
-        audio.src = musicUrl;
+        // 音乐文件URL
+        const musicUrl = 'https://cdn.jsdelivr.net/gh/linzilin678/ziyu-music/music.mp3';
         
-        function playMusic() {
-            audio.play().catch(e => alert("播放失败，请与页面交互后重试（如先点击页面空白处）。"));
-        }
+        // 3秒后自动跳转到音乐文件
+        setTimeout(() => {
+            window.location.href = musicUrl;
+        }, 3000);
         
-        function downloadMusic() {
-            const link = document.createElement('a');
-            link.href = musicUrl;
-            link.download = '梓渝音乐.mp3';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-        
-        audio.oncanplay = () => console.log("音乐已加载");
-        audio.onerror = () => alert("音乐加载出错，请检查文件名或网络。");
+        // 立即跳转（如果不想要等待）
+        // window.location.href = musicUrl;
     </script>
 </body>
 </html>
