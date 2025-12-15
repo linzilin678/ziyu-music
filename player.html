@@ -3,213 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>梓渝音乐播放器</title>
+    <title>梓渝音乐 - 网页播放器</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .player-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            text-align: center;
-        }
-        .album-art {
-            width: 200px;
-            height: 200px;
-            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
-            border-radius: 50%;
-            margin: 0 auto 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 60px;
-            color: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        .song-info {
-            margin-bottom: 30px;
-        }
-        .song-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .song-artist {
-            color: #666;
-            font-size: 18px;
-        }
-        audio {
-            width: 100%;
-            margin: 20px 0;
-            outline: none;
-        }
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-        }
-        .btn:hover {
-            background: #764ba2;
-            transform: translateY(-2px);
-        }
-        .loading {
-            color: #666;
-            font-style: italic;
-        }
-        .error {
-            color: #ff4757;
-            margin-top: 20px;
-        }
+        body { font-family: Arial; margin: 20px; background: linear-gradient(to bottom right, #dfe9f3, white); }
+        .player-card { max-width: 500px; margin: 40px auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
+        .song-title { color: #2d3436; font-size: 24px; margin: 15px 0; }
+        .direct-hint { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 10px; margin: 20px 0; }
+        .btn { padding: 12px 25px; margin: 10px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-play { background: #00b894; color: white; }
+        .btn-download { background: #0984e3; color: white; }
+        .btn-nfc { background: #6c5ce7; color: white; }
+        .btn:hover { transform: scale(1.05); }
     </style>
 </head>
 <body>
-    <div class="player-container">
-        <div class="album-art">🎵</div>
-        <div class="song-info">
-            <div class="song-title" id="songTitle">梓渝 - 萤火星球</div>
-            <div class="song-artist" id="songArtist">触碰播放</div>
+    <div class="player-card">
+        <h1>🎧 网页播放器</h1>
+        <p class="song-title">正在播放：music.mp3</p>
+        
+        <audio id="audioElement" controls style="width:100%; margin:20px 0;"></audio>
+        
+        <div class="direct-hint">
+            <p><strong>💡 提示：</strong> 如需实现“直接跳转系统播放器”，请勿使用此网页链接。</p>
+            <p>应将NFC标签写入我们提供的<strong>直接文件链接</strong>。</p>
         </div>
         
-        <div class="loading" id="loadingText">正在加载音乐...</div>
-        
-        <audio id="audioPlayer" controls>
-            您的浏览器不支持音频播放
-        </audio>
-        
-        <div class="controls">
-            <button class="btn" id="downloadBtn">
-                <span>⬇️</span> 下载
-            </button>
-            <button class="btn" onclick="shareMusic()">
-                <span>📤</span> 分享
-            </button>
+        <div>
+            <button class="btn btn-play" onclick="playMusic()">播放</button>
+            <button class="btn btn-download" onclick="downloadMusic()">下载文件</button>
+            <a href="index.html"><button class="btn btn-nfc">查看NFC链接</button></a>
         </div>
         
-        <div class="error" id="errorMsg"></div>
-        
-        <div style="margin-top: 30px; color: #888; font-size: 14px;">
-            NFC音乐播放器 | 梓渝音乐
+        <div style="margin-top: 30px; font-size: 14px; color: #636e72;">
+            <p>此页面仅作为备用播放界面使用。</p>
         </div>
     </div>
 
     <script>
-        // 获取URL参数
-        function getUrlParameter(name) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
+        const musicUrl = "https://cdn.jsdelivr.net/gh/linzilin678/ziyu-music/main/music.mp3";
+        const audio = document.getElementById('audioElement');
+        audio.src = musicUrl;
+        
+        function playMusic() {
+            audio.play().catch(e => alert("播放失败，请与页面交互后重试（如先点击页面空白处）。"));
         }
         
-        // 提取文件名
-        function getFileName(url) {
-            try {
-                const decodedUrl = decodeURIComponent(url);
-                const pathParts = decodedUrl.split('/');
-                const fileName = pathParts[pathParts.length - 1];
-                return fileName.replace('.mp3', '').replace(/[+\-]/g, ' ');
-            } catch (e) {
-                return '未知歌曲';
-            }
+        function downloadMusic() {
+            const link = document.createElement('a');
+            link.href = musicUrl;
+            link.download = '梓渝音乐.mp3';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
         
-        // 初始化播放器
-        async function initPlayer() {
-            try {
-                const musicUrl = getUrlParameter('url');
-                
-                if (!musicUrl) {
-                    showError('未找到音乐链接');
-                    return;
-                }
-                
-                // 设置歌曲信息
-                const fileName = getFileName(musicUrl);
-                document.getElementById('songTitle').textContent = fileName;
-                
-                // 设置音频播放器
-                const audioPlayer = document.getElementById('audioPlayer');
-                audioPlayer.src = musicUrl;
-                
-                // 设置下载按钮
-                const downloadBtn = document.getElementById('downloadBtn');
-                downloadBtn.onclick = () => {
-                    const a = document.createElement('a');
-                    a.href = musicUrl;
-                    a.download = fileName + '.mp3';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                };
-                
-                // 尝试自动播放
-                setTimeout(() => {
-                    audioPlayer.play().catch(e => {
-                        console.log('自动播放被阻止，需要用户交互');
-                    });
-                }, 500);
-                
-                // 隐藏加载提示
-                document.getElementById('loadingText').style.display = 'none';
-                
-            } catch (error) {
-                showError('播放器初始化失败: ' + error.message);
-            }
-        }
-        
-        // 分享功能
-        async function shareMusic() {
-            const shareData = {
-                title: document.getElementById('songTitle').textContent,
-                text: '分享一首好听的音乐',
-                url: window.location.href
-            };
-            
-            if (navigator.share) {
-                try {
-                    await navigator.share(shareData);
-                } catch (err) {
-                    console.log('分享取消:', err);
-                }
-            } else {
-                // 复制链接到剪贴板
-                navigator.clipboard.writeText(window.location.href)
-                    .then(() => alert('链接已复制到剪贴板！'))
-                    .catch(() => prompt('请手动复制链接:', window.location.href));
-            }
-        }
-        
-        // 显示错误
-        function showError(message) {
-            document.getElementById('errorMsg').textContent = message;
-        }
-        
-        // 页面加载完成
-        document.addEventListener('DOMContentLoaded', initPlayer);
+        audio.oncanplay = () => console.log("音乐已加载");
+        audio.onerror = () => alert("音乐加载出错，请检查文件名或网络。");
     </script>
 </body>
 </html>
