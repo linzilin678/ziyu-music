@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>梓渝音乐播放器</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .player-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .album-art {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .song-info {
+            margin-bottom: 30px;
+        }
+        .song-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .song-artist {
+            color: #666;
+            font-size: 18px;
+        }
+        audio {
+            width: 100%;
+            margin: 20px 0;
+            outline: none;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+        .error {
+            color: #ff4757;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <div class="album-art">🎵</div>
+        <div class="song-info">
+            <div class="song-title" id="songTitle">梓渝 - 萤火星球</div>
+            <div class="song-artist" id="songArtist">触碰播放</div>
+        </div>
+        
+        <div class="loading" id="loadingText">正在加载音乐...</div>
+        
+        <audio id="audioPlayer" controls>
+            您的浏览器不支持音频播放
+        </audio>
+        
+        <div class="controls">
+            <button class="btn" id="downloadBtn">
+                <span>⬇️</span> 下载
+            </button>
+            <button class="btn" onclick="shareMusic()">
+                <span>📤</span> 分享
+            </button>
+        </div>
+        
+        <div class="error" id="errorMsg"></div>
+        
+        <div style="margin-top: 30px; color: #888; font-size: 14px;">
+            NFC音乐播放器 | 梓渝音乐
+        </div>
+    </div>
+
+    <script>
+        // 获取URL参数
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        
+        // 提取文件名
+        function getFileName(url) {
+            try {
+                const decodedUrl = decodeURIComponent(url);
+                const pathParts = decodedUrl.split('/');
+                const fileName = pathParts[pathParts.length - 1];
+                return fileName.replace('.mp3', '').replace(/[+\-]/g, ' ');
+            } catch (e) {
+                return '未知歌曲';
+            }
+        }
+        
+        // 初始化播放器
+        async function initPlayer() {
+            try {
+                const musicUrl = getUrlParameter('url');
+                
+                if (!musicUrl) {
+                    showError('未找到音乐链接');
+                    return;
+                }
+                
+                // 设置歌曲信息
+                const fileName = getFileName(musicUrl);
+                document.getElementById('songTitle').textContent = fileName;
+                
+                // 设置音频播放器
+                const audioPlayer = document.getElementById('audioPlayer');
+                audioPlayer.src = musicUrl;
+                
+                // 设置下载按钮
+                const downloadBtn = document.getElementById('downloadBtn');
+                downloadBtn.onclick = () => {
+                    const a = document.createElement('a');
+                    a.href = musicUrl;
+                    a.download = fileName + '.mp3';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                };
+                
+                // 尝试自动播放
+                setTimeout(() => {
+                    audioPlayer.play().catch(e => {
+                        console.log('自动播放被阻止，需要用户交互');
+                    });
+                }, 500);
+                
+                // 隐藏加载提示
+                document.getElementById('loadingText').style.display = 'none';
+                
+            } catch (error) {
+                showError('播放器初始化失败: ' + error.message);
+            }
+        }
+        
+        // 分享功能
+        async function shareMusic() {
+            const shareData = {
+                title: document.getElementById('songTitle').textContent,
+                text: '分享一首好听的音乐',
+                url: window.location.href
+            };
+            
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                } catch (err) {
+                    console.log('分享取消:', err);
+                }
+            } else {
+                // 复制链接到剪贴板
+                navigator.clipboard.writeText(window.location.href)
+                    .then(() => alert('链接已复制到剪贴板！'))
+                    .catch(() => prompt('请手动复制链接:', window.location.href));
+            }
+        }
+        
+        // 显示错误
+        function showError(message) {
+            document.getElementById('errorMsg').textContent = message;
+        }
+        
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', initPlayer);
+    </script>
+</body>
+</html>
