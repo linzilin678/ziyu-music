@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>梓渝音乐 - NFC触碰播放</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        .logo {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(45deg, #FF6B6B, #FFE66D);
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(255,107,107,0.4);
+        }
+        
+        h1 {
+            color: #2D3436;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        
+        .subtitle {
+            color: #636E72;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        
+        .player-card {
+            background: #F8F9FA;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            border: 2px solid #DFE6E9;
+        }
+        
+        .now-playing {
+            font-size: 20px;
+            color: #2D3436;
+            margin-bottom: 10px;
+        }
+        
+        .song-title {
+            font-size: 24px;
+            color: #0984E3;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        
+        audio {
+            width: 100%;
+            margin: 20px 0;
+            border-radius: 10px;
+            outline: none;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #0984E3;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0770C4;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(9,132,227,0.3);
+        }
+        
+        .btn-secondary {
+            background: #00B894;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #00A085;
+            transform: translateY(-2px);
+        }
+        
+        .instructions {
+            background: #FFF9E6;
+            border-left: 5px solid #FDCB6E;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+            text-align: left;
+        }
+        
+        .instructions h3 {
+            color: #E17055;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+        
+        .qr-code {
+            margin: 25px auto;
+            width: 200px;
+            height: 200px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: #636E72;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            color: #636E72;
+            font-size: 14px;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #D4EDDA;
+            color: #155724;
+            border: 1px solid #C3E6CB;
+        }
+        
+        .status.error {
+            background: #F8D7DA;
+            color: #721C24;
+            border: 1px solid #F5C6CB;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Logo -->
+        <div class="logo">🎵</div>
+        
+        <!-- 标题 -->
+        <h1>梓渝音乐播放器</h1>
+        <p class="subtitle">NFC触碰播放 · 随时随地享受音乐</p >
+        
+        <!-- 播放状态 -->
+        <div id="status" class="status">
+            正在初始化播放器...
+        </div>
+        
+        <!-- 播放器卡片 -->
+        <div class="player-card">
+            <div class="now-playing">🎧 正在播放</div>
+            <div id="songTitle" class="song-title">梓渝 - 萤火星球</div>
+            
+            <!-- 音频播放器 -->
+            <audio id="audioPlayer" controls>
+                您的浏览器不支持音频播放
+            </audio>
+            
+            <!-- 播放状态信息 -->
+            <div id="playerInfo"></div>
+        </div>
+        
+        <!-- 控制按钮 -->
+        <div class="controls">
+            <button class="btn btn-primary" id="playBtn">
+                <span>▶️</span> 播放
+            </button>
+            <button class="btn btn-primary" id="pauseBtn">
+                <span>⏸️</span> 暂停
+            </button>
+            <button class="btn btn-secondary" id="downloadBtn">
+                <span>⬇️</span> 下载音乐
+            </button>
+            <button class="btn btn-secondary" onclick="shareMusic()">
+                <span>📤</span> 分享
+            </button>
+        </div>
+        
+        <!-- 使用说明 -->
+        <div class="instructions">
+            <h3>📱 使用方法：</h3>
+            <ol>
+                <li><strong>NFC触碰</strong>：用手机触碰NFC标签自动播放</li>
+                <li><strong>直接播放</strong>：点击上方播放按钮开始播放</li>
+                <li><strong>下载音乐</strong>：点击下载按钮保存到手机</li>
+                <li><strong>分享给朋友</strong>：点击分享按钮发送链接</li>
+            </ol>
+        </div>
+        
+        <!-- 二维码占位 -->
+        <div class="qr-code">
+            📱
+        </div>
+        <p style="color: #636E72; font-size: 14px;">
+            扫描二维码用手机打开
+        </p >
+        
+        <!-- 页脚 -->
+        <div class="footer">
+            <p>© 2023 梓渝音乐 · NFC音乐播放系统</p >
+            <p>技术支持：GitHub Pages + JSDelivr CDN</p >
+        </div>
+    </div>
+
+    <script>
+        // 音乐文件配置
+        const MUSIC_CONFIG = {
+            // 自动检测的音乐文件名（按优先级排序）
+            possibleFilenames: [
+                '梓渝 - 萤火星球.mp3',
+                '梓渝%20-%20萤火星球.mp3',
+                '%E6%A2%93%E6%B8%9D%20-%20%E8%90%A4%E7%81%AB%E6%98%9F%E7%90%83.mp3',
+                'music.mp3',
+                'song.mp3',
+                'ziyu-firefly-planet.mp3'
+            ],
+            
+            // 基础URL
+            baseUrl: 'https://cdn.jsdelivr.net/gh/linzilin678/ziyu-music/main/',
+            
+            // 备用音乐（用于测试）
+            fallbackMusic: 'https://cdn.jsdelivr.net/gh/linzilin678/ziyu-music/main/music.mp3'
+        };
+        
+        // DOM元素
+        const audioPlayer = document.getElementById('audioPlayer');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const statusDiv = document.getElementById('status');
+        const songTitle = document.getElementById('songTitle');
+        const playerInfo = document.getElementById('playerInfo');
+        
+        // 当前播放的音乐URL
+        let currentMusicUrl = '';
+        
+        // 更新状态显示
+        function updateStatus(message, type = 'info') {
+            statusDiv.textContent = message;
+            statusDiv.className = 'status';
+            
+            if (type === 'success') {
+                statusDiv.classList.add('success');
+            } else if (type === 'error') {
+                statusDiv.classList.add('error');
+            }
+            
+            console.log(`状态: ${message}`);
+        }
+        
+        // 从URL参数获取音乐链接
+        function getMusicUrlFromParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const url = urlParams.get('url');
+            
+            if (url) {
+                try {
+                    return decodeURIComponent(url);
+                } catch (e) {
+                    return url;
+                }
+            }
+            
+            return null;
+        }
+        
+        // 尝试查找可用的音乐文件
+        async function findAvailableMusic() {
+            updateStatus('正在搜索音乐文件...');
+            
+            // 先检查URL参数
+            const paramUrl = getMusicUrlFromParams();
+            if (paramUrl) {
+                updateStatus('使用URL参数中的音乐链接');
+                return paramUrl;
+            }
+            
+            // 尝试可能的文件名
+            for (const filename of MUSIC_CONFIG.possibleFilenames) {
+                const testUrl = MUSIC_CONFIG.baseUrl + filename;
+                
+                try {
+                    updateStatus(`测试: ${filename}`);
+                    const response = await fetch(testUrl, { method: 'HEA
